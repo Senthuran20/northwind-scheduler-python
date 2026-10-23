@@ -1,0 +1,8 @@
+[
+  {"id": "priya", "name": "Priya Raman", "email": "priya.raman@northwind.example", "phone": "+1-415-555-0142", "title": "Engineering Manager", "manager": "dana", "home_city": "Oakland"},
+  {"id": "sam", "name": "Sam Okafor", "email": "sam.okafor@northwind.example", "phone": "+1-415-555-0178", "title": "Staff Engineer", "manager": "priya", "home_city": "San Mateo"},
+  {"id": "dana", "name": "Dana Whitfield", "email": "dana.whitfield@northwind.example", "phone": "+1-415-555-0101", "title": "VP Engineering", "manager": null, "home_city": "San Francisco"},
+  {"id": "luis", "name": "Luis Moreno", "email": "luis.moreno@northwind.example", "phone": "+1-415-555-0133", "title": "Product Designer", "manager": "dana", "home_city": "Berkeley"},
+  {"id": "mei", "name": "Mei Tanaka", "email": "mei.tanaka@northwind.example", "phone": "+1-415-555-0190", "title": "Product Manager", "manager": "dana", "home_city": "Palo Alto"},
+  {"id": "arjun", "name": "Arjun Iyer", "email": "arjun.iyer@northwind.example", "phone": "+1-415-555-0165", "title": "Software Engineer", "manager": "priya", "home_city": "Fremont"}
+]

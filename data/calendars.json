@@ -1,0 +1,58 @@
+{
+  "priya": {
+    "2026-11-02": [
+      {"start": "09:00", "end": "10:00", "title": "Eng leads sync"},
+      {"start": "13:00", "end": "14:00", "title": "1:1 Sam - performance review"}
+    ],
+    "2026-11-03": [
+      {"start": "09:30", "end": "11:00", "title": "Quarterly planning"},
+      {"start": "14:00", "end": "15:00", "title": "Hiring debrief"}
+    ],
+    "2026-11-04": [
+      {"start": "10:00", "end": "12:00", "title": "Architecture review"}
+    ]
+  },
+  "sam": {
+    "2026-11-02": [
+      {"start": "13:00", "end": "14:00", "title": "1:1 Priya - performance review"},
+      {"start": "15:00", "end": "15:30", "title": "Dentist"}
+    ],
+    "2026-11-03": [
+      {"start": "09:00", "end": "09:30", "title": "Standup"},
+      {"start": "12:00", "end": "13:00", "title": "Lunch with recruiter"},
+      {"start": "15:30", "end": "16:00", "title": "Pairing with Arjun"}
+    ],
+    "2026-11-04": [
+      {"start": "09:00", "end": "09:30", "title": "Standup"}
+    ]
+  },
+  "dana": {
+    "2026-11-02": [
+      {"start": "09:00", "end": "12:00", "title": "Board prep"},
+      {"start": "14:00", "end": "16:30", "title": "Offsite planning"}
+    ],
+    "2026-11-03": [
+      {"start": "11:00", "end": "12:00", "title": "Reorg discussion (confidential)"}
+    ]
+  },
+  "luis": {
+    "2026-11-03": [
+      {"start": "10:00", "end": "11:30", "title": "Design critique"},
+      {"start": "16:00", "end": "17:00", "title": "User interviews"}
+    ]
+  },
+  "mei": {
+    "2026-11-02": [
+      {"start": "10:00", "end": "10:45", "title": "Customer call - Acme renewal"}
+    ],
+    "2026-11-03": [
+      {"start": "13:00", "end": "15:00", "title": "Roadmap workshop"}
+    ]
+  },
+  "arjun": {
+    "2026-11-03": [
+      {"start": "09:00", "end": "09:30", "title": "Standup"},
+      {"start": "15:30", "end": "16:00", "title": "Pairing with Sam"}
+    ]
+  }
+}
