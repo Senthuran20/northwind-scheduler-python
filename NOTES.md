@@ -50,10 +50,11 @@
 ## Part B: multiple meeting options
 
 - The assistant offers up to three validated options so employees can
-  compare times rather than receive only one. **Example:** show two searched
-  openings when both meet the request. I chose this over automatically
-  returning only the earliest slot because employees may have different
-  preferences; the list stays capped, though options may overlap.
+  compare times rather than receive only one. **Example:** for a one-hour
+  Tuesday request with Priya and Sam, show up to three openings that the
+  calendar search returned and the application validated. I chose this over
+  automatically returning only the earliest slot because employees may have
+  different preferences; the list stays capped, though options may overlap.
 
 ## AI-tool use
 
@@ -80,20 +81,22 @@
 
 ## What I would do next
 
-- Add ambiguous legacy `final` tests. **Example:** test “13:00 works” when
-  multiple windows could match. Response-size handling is covered by a
-  just-over-the-limit test; agent transport failures cover connection errors
-  and timeouts.
+- Add explicit agent tests for `ModelRequestError` and ambiguous legacy
+  `final` responses. **Example:** verify a `ModelRequestError` produces a
+  controlled error, and that “13:00 works” is not accepted if multiple
+  searched windows could match. Connection and timeout errors are already
+  tested; response-size handling has a just-over-the-limit test.
 - Improve clarification and offer user-approved broader searches. Empty
   searches may be followed by another search only when the next date respects
   the user's request. If searches find no valid option, the assistant returns
   a controlled no-availability response; if the call limit is reached while
   usable windows exist but no recommendation is completed, it returns a
-  controlled limit failure. **Example:** do not search Monday for “next
-  Tuesday.”
+  controlled limit failure. **Example:** if Tuesday has no opening, ask
+  before searching Wednesday; never search Monday for “next Tuesday.”
 - Support weekday ranges only with a structured request schema; for now,
   phrases such as “Monday through Wednesday” fail clearly instead of being
-  guessed.
+  guessed. **Example:** once the request can represent a date range, search
+  each allowed day rather than guessing one.
 - Track calendar coverage and sync status so a missing entry differs from a
   confirmed empty calendar. **Example:** record whether Mei's November 4
   calendar was successfully synced rather than inferring coverage from the
