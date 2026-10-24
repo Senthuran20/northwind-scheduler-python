@@ -371,7 +371,9 @@ def _requested_weekday(text: str) -> tuple[str, int] | None:
             re.search(pattern, text, re.IGNORECASE)
             for pattern in weekday_range_patterns
         ):
-            return None
+            raise ValueError(
+                "weekday ranges are not supported; please specify one weekday"
+            )
 
         choice_match = re.search(
             r"\b(?:Mon(?:day)?|Tue(?:sday)?|Wed(?:nesday)?|Thu(?:rsday)?|"
@@ -750,7 +752,7 @@ class SchedulingAgent:
         for _ in range(MAX_TOOL_CALLS + 1):
             try:
                 raw = self.model.complete(messages)
-            except ModelRequestError as exc:
+            except (ModelRequestError, OSError) as exc:
                 return f"I couldn't get a valid response from the model: {exc}"
             if not isinstance(raw, str):
                 return "I couldn't process the model response, so I stopped without making a recommendation."

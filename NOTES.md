@@ -20,7 +20,12 @@
   early stopping after empty searches. Searches must honor explicit dates or
   weekdays; an undated request may try another date. **Example:** an empty
   Tuesday search may be followed by Monday for an undated request, but not
-  for “next Tuesday.”
+  for “next Tuesday.” Weekday ranges are rejected for clarification rather
+  than silently ignored; e.g. “before Wednesday” asks the user to specify
+  one weekday.
+- Request checks cover supported, explicit forms; they are not a full natural-
+  language parser. **Example:** unsupported date wording should be clarified,
+  not guessed.
 - **Privacy and CLI:** Inspection showed event titles and personal details
   were unnecessary, so model-facing data is limited to scheduling fields.
   The CLI and scripted demo now both request one hour. **Example:** a Friday
@@ -61,12 +66,24 @@
   be accepted only if it matches a searched window; structured
   recommendations are checked before application-side rendering.
 
+## Left alone, and why
+
+- **Overlapping options:** allowed to keep the Part B list small; selecting
+  non-overlapping alternatives would need a separate ranking policy.
+- **Weekday ranges:** rejected for clarification until a structured request
+  schema can represent ranges safely.
+- **Request matching for `get_busy_times`:** not added; it returns raw busy
+  intervals, while attendee/date intent validation is applied to slot searches.
+- **Retries after malformed model output:** not added; bounded failure is
+  simpler and avoids repeating invalid calls.
+- **Time zones:** left out because the sample calendars have no timezone data.
+
 ## What I would do next
 
-- Add agent-level handling coverage for `ModelRequestError`, response-size
-  boundary tests, and ambiguous legacy `final` tests. **Examples:** simulate
-  the model error in the agent, test a response just over the cap, and test
-  “13:00 works” when multiple windows could match.
+- Add ambiguous legacy `final` tests. **Example:** test “13:00 works” when
+  multiple windows could match. Response-size handling is covered by a
+  just-over-the-limit test; agent transport failures cover connection errors
+  and timeouts.
 - Improve clarification and offer user-approved broader searches. Empty
   searches may be followed by another search only when the next date respects
   the user's request. If searches find no valid option, the assistant returns
@@ -74,7 +91,17 @@
   usable windows exist but no recommendation is completed, it returns a
   controlled limit failure. **Example:** do not search Monday for “next
   Tuesday.”
+- Support weekday ranges only with a structured request schema; for now,
+  phrases such as “Monday through Wednesday” fail clearly instead of being
+  guessed.
 - Track calendar coverage and sync status so a missing entry differs from a
   confirmed empty calendar. **Example:** record whether Mei's November 4
   calendar was successfully synced rather than inferring coverage from the
   missing entry.
+
+## Key design choices
+
+- The **15-minute grid** represents the assignment's 45-minute example
+  exactly; a 30-minute grid cannot.
+- **Application-side rendering** keeps recommendations tied to validated
+  attendee IDs and exact windows instead of trusting model-generated claims.

@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from scheduler.agent import SchedulingAgent
+from scheduler.agent import MAX_MODEL_RESPONSE_CHARS, SchedulingAgent
 from scheduler.model import (
     FakeModel,
     final,
@@ -17,6 +17,34 @@ def test_agent_returns_final_answer():
     model = FakeModel([final("Happy to help!")])
     agent = SchedulingAgent(model, Store.load())
     assert agent.run("hello") == "Happy to help!"
+
+
+def test_agent_rejects_model_response_just_over_size_limit():
+    model = FakeModel([" " * (MAX_MODEL_RESPONSE_CHARS + 1)])
+
+    answer = SchedulingAgent(model, Store.load()).run("hello")
+
+    assert answer == "I couldn't process the model response because it was too large."
+    assert len(model.calls) == 1
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        OSError("connection failed"),
+        ConnectionError("connection refused"),
+        TimeoutError("request timed out"),
+    ],
+)
+def test_agent_handles_transport_errors_from_model(error):
+    class FailingModel:
+        def complete(self, _messages):
+            del _messages
+            raise error
+
+    answer = SchedulingAgent(FailingModel(), Store.load()).run("hello")
+
+    assert answer == f"I couldn't get a valid response from the model: {error}"
 
 
 def test_agent_calls_tool_and_returns_result_to_model():
@@ -129,9 +157,13 @@ def test_agent_matches_weekday_names_without_guessing_week_offsets(
         ("Find 30 minutes with Priya Monday through Wednesday", "2026-11-03"),
         ("Find 30 minutes with Priya Monday to Wednesday", "2026-11-03"),
         ("Find 30 minutes with Priya between Monday and Wednesday", "2026-11-03"),
+        (
+            "Find 30 minutes with Priya on Tuesday, after Monday standup",
+            "2026-11-03",
+        ),
     ],
 )
-def test_agent_does_not_treat_weekday_ranges_as_exact_days(
+def test_agent_rejects_unsupported_or_ambiguous_weekday_ranges(
     user_request, search_date
 ):
     model = FakeModel([
@@ -141,18 +173,15 @@ def test_agent_does_not_treat_weekday_ranges_as_exact_days(
             date=search_date,
             duration_minutes=30,
         ),
-        recommendation(
-            attendees=["priya"],
-            date=search_date,
-            duration_minutes=30,
-            start="11:00",
-            end="11:30",
-        ),
     ])
 
     answer = SchedulingAgent(model, Store.load()).run(user_request)
 
-    assert f"on {search_date} from 11:00 to 11:30" in answer
+    assert answer == (
+        "I couldn't run the requested tool: weekday ranges are not supported; "
+        "please specify one weekday."
+    )
+    assert len(model.calls) == 1
 
 
 def test_agent_accepts_demo_search_for_matching_tuesday_request():
@@ -587,7 +616,6 @@ def test_agent_rejects_ambiguous_attendee_choice():
         "Find an hour with Priya and Sam Nov 3",
         "Find an hour with Priya and Sam 3 Nov",
         "Find an hour with Priya and Sam Tue",
-        "Find an hour with Priya and Sam on Tuesday, after Monday standup",
     ],
 )
 def test_agent_accepts_nonconflicting_date_and_attendee_qualifiers(user_request):
