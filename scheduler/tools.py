@@ -53,7 +53,7 @@ def resolve_attendee_ids(store: Store, person_ids: list[str]) -> list[str]:
     return resolved
 
 
-def _require_known_people(store: Store, person_ids: list[str]) -> None:
+def _require_known_people(store: Store, person_ids: list[str]) -> list[str]:
     if not person_ids:
         raise ValueError("at least one attendee is required")
     if any(not isinstance(person_id, str) or not person_id for person_id in person_ids):
@@ -68,6 +68,7 @@ def _require_known_people(store: Store, person_ids: list[str]) -> None:
         raise UnknownPersonError(
             f"I couldn't find these people in the employee directory: {names}."
         )
+    return person_ids
 
 
 def _require_calendar_date(store: Store, date: str) -> None:
@@ -92,8 +93,7 @@ def list_people(store: Store) -> list[dict]:
 
 def get_busy_times(store: Store, person: str, date: str) -> list[dict]:
     """Return only busy intervals for a person on a date (YYYY-MM-DD)."""
-    resolved_person = resolve_attendee_ids(store, [person])[0]
-    _require_known_people(store, [resolved_person])
+    resolved_person = _require_known_people(store, [person])[0]
     _require_calendar_date(store, date)
     return [
         {"start": block["start"], "end": block["end"]}
@@ -114,8 +114,7 @@ def find_free_slots(
     `earliest` and `latest` optionally narrow the search to part of the day
     (e.g. earliest="12:00" for "afternoon").
     """
-    attendees = resolve_attendee_ids(store, attendees)
-    _require_known_people(store, attendees)
+    attendees = _require_known_people(store, attendees)
     _require_calendar_date(store, date)
     if (
         not isinstance(duration_minutes, int)

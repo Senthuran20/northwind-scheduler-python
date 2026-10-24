@@ -768,14 +768,20 @@ class SchedulingAgent:
 
             if not isinstance(action, dict):
                 return "I couldn't process the model response, so I stopped without making a recommendation."
-            if set(action) == {"final"}:
+            action_keys = set(action)
+            if (
+                action_keys in ({"final"}, {"recommendation"}, {"recommendations"})
+                and (action_keys != {"final"} or isinstance(action["final"], str))
+                and searches
+                and not any(context.windows for context in searches)
+            ):
+                return _no_availability_message(
+                    searches, self.store.people, _requested_period(user_request)
+                )
+            if action_keys == {"final"}:
                 answer = action["final"]
                 if not isinstance(answer, str):
                     return "I couldn't process the model response, so I stopped without making a recommendation."
-                if searches and not any(context.windows for context in searches):
-                    return _no_availability_message(
-                        searches, self.store.people, _requested_period(user_request)
-                    )
                 if _AVAILABILITY_CLAIM_PATTERN.search(answer) or _CLOCK_PATTERN.search(answer):
                     rendered = _render_supported_final(
                         answer, searches, self.store.people, self.today
@@ -787,11 +793,7 @@ class SchedulingAgent:
                         "so I won't recommend that time."
                     )
                 return answer
-            if set(action) == {"recommendation"}:
-                if searches and not any(context.windows for context in searches):
-                    return _no_availability_message(
-                        searches, self.store.people, _requested_period(user_request)
-                    )
+            if action_keys == {"recommendation"}:
                 try:
                     answer = _validate_recommendation(
                         action["recommendation"], searches, self.store.people
@@ -804,11 +806,7 @@ class SchedulingAgent:
                         "so I won't recommend that time."
                     )
                 return answer
-            if set(action) == {"recommendations"}:
-                if searches and not any(context.windows for context in searches):
-                    return _no_availability_message(
-                        searches, self.store.people, _requested_period(user_request)
-                    )
+            if action_keys == {"recommendations"}:
                 try:
                     answer = _render_recommendation_list(
                         action["recommendations"], searches, self.store.people
@@ -821,7 +819,7 @@ class SchedulingAgent:
                         "calendar results, so I won't recommend them."
                     )
                 return answer
-            if set(action) != {"tool", "args"}:
+            if action_keys != {"tool", "args"}:
                 return "I couldn't process the model response, so I stopped without making a recommendation."
 
             tool_name = action["tool"]
